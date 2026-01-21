@@ -68,10 +68,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
             <ShoppingCart size={20} />
             <span>Nueva Venta</span>
           </Link>
-          <Link to="/proveedores" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <UserMinus2 size={20} />
-            <span>Proveedores</span>
-          </Link>
           <Link to="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
             <FileText size={20} />
             <span>Facturas</span>
