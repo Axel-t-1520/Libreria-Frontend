@@ -1,142 +1,213 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Package, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react';
+import { Package, Eye, EyeOff, AlertCircle, LogIn, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
+  const [view, setView] = useState('login'); // 'login' | 'recover'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState(''); // Para mensaje de recuperación
   const [loading, setLoading] = useState(false);
   
-  const { login } = useAuth();
+  // Traemos las funciones que creamos en el AuthContext
+  const { login, recuperarPassword } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  // --- MANEJO DE LOGIN ---
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      // Llama a la ruta /vendedor/login via Context
       const result = await login(email, password);
       
       if (result.success) {
-        navigate('/');
+        navigate('/'); // Redirige al Dashboard
       } else {
-        setError(result.error || 'Error desconocido al iniciar sesión');
+        setError(result.error);
       }
     } catch (err) {
-      setError('Error inesperado. Revisa la consola.');
+      setError('Error inesperado. Intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- MANEJO DE RECUPERACIÓN ---
+  const handleRecovery = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    setLoading(true);
+
+    try {
+      // Llama a la ruta /vendedor/recuperar-password via Context
+      const result = await recuperarPassword(email);
+      
+      if (result.success) {
+        setSuccessMsg('Se ha enviado un enlace a tu correo.');
+        setTimeout(() => setView('login'), 3000); // Volver al login después de 3s
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Error al intentar recuperar contraseña.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // min-h-[100dvh] asegura que cubra la pantalla completa en móviles modernos
     <div className="min-h-[100dvh] bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       
       <div className="w-full max-w-md w-full animate-in fade-in zoom-in duration-300">
+        
         {/* Logo y título */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-2xl mb-4 shadow-lg shadow-green-200 transform transition-transform hover:scale-105">
             <Package size={32} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Librería T&M</h1>
-          <p className="text-gray-600">Bienvenido de nuevo</p>
+          <p className="text-gray-600">
+            {view === 'login' ? 'Bienvenido de nuevo' : 'Recuperar acceso'}
+          </p>
         </div>
 
         {/* Card del Formulario */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* Mensaje de Error */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 animate-pulse">
-                <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
-                <div className="flex-1">
-                  <h3 className="text-red-800 text-sm font-semibold">Error de acceso</h3>
-                  <p className="text-red-600 text-sm mt-1">{error}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
-                Correo Electrónico
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-gray-50 focus:bg-white"
-                placeholder="ejemplo@libreria.com"
-                required
-                disabled={loading}
-              />
+          
+          {/* Mensajes de Error o Éxito */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-6 animate-pulse">
+              <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
+              <p className="text-red-700 text-sm font-medium">{error}</p>
             </div>
+          )}
+          {successMsg && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-green-700 text-sm font-medium text-center">
+              {successMsg}
+            </div>
+          )}
 
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2">
-                Contraseña
-              </label>
-              <div className="relative">
+          {/* === VISTA DE LOGIN === */}
+          {view === 'login' && (
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico</label>
                 <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all pr-12 bg-gray-50 focus:bg-white"
-                  placeholder="••••••••"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full input-field" // Asume que tienes clases CSS o usa las largas de Tailwind
+                  placeholder="ejemplo@libreria.com"
                   required
                   disabled={loading}
                 />
-                <button
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Contraseña</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full input-field pr-12"
+                    placeholder="••••••••"
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-green-600"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button 
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-green-600 transition-colors rounded-full hover:bg-green-50"
-                  disabled={loading}
-                  tabIndex={-1} // Evita que el tabulador se detenga en el ojo
+                  onClick={() => { setError(''); setView('recover'); }}
+                  className="text-sm font-medium text-green-600 hover:text-green-700 hover:underline"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  ¿Olvidaste tu contraseña?
                 </button>
               </div>
-            </div>
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Verificando...</span>
-                </>
-              ) : (
-                <>
-                  <LogIn size={20} />
-                  <span>Iniciar Sesión</span>
-                </>
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full btn-primary flex items-center justify-center gap-2 py-3.5"
+              >
+                {loading ? 'Verificando...' : <><LogIn size={20} /> Iniciar Sesión</>}
+              </button>
+            </form>
+          )}
 
-          {/* Demo credentials (Opcional, estilo mejorado) */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-             <div className="text-center">
-                <p className="text-xs text-gray-400 font-medium">
-                  Librería T&M &copy; {new Date().getFullYear()}
-                </p>
-             </div>
+          {/* === VISTA DE RECUPERAR CONTRASEÑA === */}
+          {view === 'recover' && (
+            <form onSubmit={handleRecovery} className="space-y-6">
+              <p className="text-sm text-gray-500 mb-4">
+                Ingresa tu correo electrónico y te enviaremos instrucciones para restablecer tu contraseña.
+              </p>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full input-field"
+                  placeholder="ejemplo@libreria.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full btn-primary py-3.5"
+              >
+                {loading ? 'Enviando...' : 'Enviar correo de recuperación'}
+              </button>
+
+              <button 
+                type="button"
+                onClick={() => { setError(''); setSuccessMsg(''); setView('login'); }}
+                className="w-full flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700 font-medium py-2"
+              >
+                <ArrowLeft size={18} /> Volver al inicio de sesión
+              </button>
+            </form>
+          )}
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+             <p className="text-xs text-gray-400 font-medium">
+               Librería T&M &copy; {new Date().getFullYear()}
+             </p>
           </div>
         </div>
       </div>
+
+      {/* Estilos locales para mantener el código limpio */}
+      <style>{`
+        .input-field {
+          @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-gray-50 focus:bg-white;
+        }
+        .btn-primary {
+          @apply bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+        }
+      `}</style>
     </div>
   );
 };

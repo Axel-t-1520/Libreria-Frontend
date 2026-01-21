@@ -10,15 +10,17 @@ export const formatDate = (date) => {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    hour12 : false
   });
 };
 
 export const formatDateTime = (date) => {
   return new Date(date).toLocaleString('es-BO', {
     year: 'numeric',
-    month: 'short',
+    month: '2-digit',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false
   });
 };

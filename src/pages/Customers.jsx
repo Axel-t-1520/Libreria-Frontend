@@ -16,8 +16,10 @@ import {
   Package,
   Phone,
   CreditCard,
-  FileText
+  FileText,
+  Calendar
 } from "lucide-react";
+import { formatDate, formatDateTime } from "../utils/format";
 
 // --- 1. SIDEBAR OPTIMIZADO (Flexbox) ---
 const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
@@ -103,6 +105,7 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
     apellido: "",
     ci: "",
     telefono: "",
+    fecha_registro:""
   });
   const [loading, setLoading] = useState(false);
 
@@ -170,7 +173,7 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">CI / NIT *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">CI *</label>
             <input
               type="text"
               value={formData.ci}
@@ -375,10 +378,13 @@ const Customers = () => {
                             Cliente
                           </th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            CI / NIT
+                            CI
                           </th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             Teléfono
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Fecha_Registro
                           </th>
                           <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             Acciones
@@ -425,6 +431,14 @@ const Customers = () => {
                               ) : (
                                 <span className="text-sm text-gray-400 italic">No registrado</span>
                               )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2 bg-gray-50 w-fit px-2 py-1 rounded text-gray-700">
+                                <Calendar size={14} className="text-gray-400" />
+                                <span className="text-sm font-medium">
+                                  {formatDateTime(cliente.fecha_registro)}
+                                </span>
+                              </div>
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2">
