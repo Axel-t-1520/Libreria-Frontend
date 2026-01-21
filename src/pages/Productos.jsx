@@ -471,7 +471,6 @@ const Products = () => {
     };
   }, []);
 
-  
 
   const handleSave = async (formData, isUpdate) => {
     try {
