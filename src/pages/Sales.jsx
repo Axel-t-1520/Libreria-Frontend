@@ -56,23 +56,23 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
           <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">
             General
           </div>
-          <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <TrendingUp size={20} />
             <span>Dashboard</span>
           </Link>
-          <Link href="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link to="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <Package size={20} />
             <span>Productos</span>
           </Link>
-          <Link href="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link to="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <Users size={20} />
             <span>Clientes</span>
           </Link>
-          <Link href="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
+          <Link to="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
             <ShoppingCart size={20} />
             <span>Ventas</span>
           </Link>
-          <Link href="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link to="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <FileText size={20} />
             <span>Facturas</span>
           </Link>
