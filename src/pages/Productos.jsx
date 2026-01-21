@@ -437,7 +437,7 @@ const Products = () => {
         {
           event: "*", // Escuchar TODO (Insert, Update, Delete)
           schema: "public",
-          table: "producto", // Nombre EXACTO de tu tabla en Supabase
+          table: "Producto", // Nombre EXACTO de tu tabla en Supabase
         },
         (payload) => {
           console.log("🔔 ¡Cambio detectado en BD!", payload);
