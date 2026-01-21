@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -9,7 +9,6 @@ import Invoices from './pages/Invoices';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -20,9 +19,10 @@ const PrivateRoute = ({ children }) => {
   
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
-
 function AppRoutes() {
   return (
+    <BrowserRouter>
+    <AuthProvider>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route
@@ -66,6 +66,8 @@ function AppRoutes() {
         }
       />
     </Routes>
+    </AuthProvider>
+    </BrowserRouter>
   );
 }
 
