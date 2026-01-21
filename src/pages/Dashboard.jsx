@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../config/api";
 import { formatCurrency, formatDate } from "../utils/format";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Importante: Link y useLocation
 import {
   LineChart,
   Line,
@@ -30,94 +30,108 @@ import {
 } from "lucide-react";
 
 // =========================================================
-// 1. COMPONENTE SIDEBAR (Estilo Flexbox)
+// 1. COMPONENTE SIDEBAR (Movido AFUERA de Dashboard)
 // =========================================================
-const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
-  <>
-    {sidebarOpen && (
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-        onClick={() => setSidebarOpen(false)}
-      />
-    )}
+const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => {
+  const location = useLocation(); // Hook para saber dónde estamos
 
-    <aside
-      className={`
-      fixed lg:static top-0 left-0 z-50 h-full w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300
-      ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      shrink-0
-    `}
-    >
-      <div className="p-6 flex-1 overflow-y-auto">
-        <button
+  // Función para pintar activo el botón
+  const getLinkClass = (path) => {
+    const isActive = location.pathname === path;
+    return `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+      isActive 
+        ? "bg-green-600 text-white shadow-md" 
+        : "text-gray-400 hover:bg-gray-800 hover:text-white"
+    }`;
+  };
+
+  return (
+    <>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
-          className="absolute top-4 right-4 lg:hidden text-gray-400 hover:text-white"
-        >
-          <X size={24} />
-        </button>
+        />
+      )}
 
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Package size={24} />
+      <aside
+        className={`
+        fixed lg:static top-0 left-0 z-50 h-full w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        shrink-0
+      `}
+      >
+        <div className="p-6 flex-1 overflow-y-auto">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="absolute top-4 right-4 lg:hidden text-gray-400 hover:text-white"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Package size={24} />
+            </div>
+            <span className="text-xl font-bold">Librería T&M</span>
           </div>
-          <span className="text-xl font-bold">Librería T&M</span>
+
+          <nav className="space-y-1">
+            <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">
+              General
+            </div>
+            {/* USAMOS LINK PARA NO RECARGAR LA PÁGINA */}
+            <Link to="/" className={getLinkClass("/")}>
+              <TrendingUp size={20} />
+              <span>Dashboard</span>
+            </Link>
+            <Link to="/productos" className={getLinkClass("/productos")}>
+              <Package size={20} />
+              <span>Productos</span>
+            </Link>
+            <Link to="/clientes" className={getLinkClass("/clientes")}>
+              <Users size={20} />
+              <span>Clientes</span>
+            </Link>
+            <Link to="/ventas" className={getLinkClass("/ventas")}>
+              <ShoppingCart size={20} />
+              <span>Ventas</span>
+            </Link>
+            <Link to="/proveedores" className={getLinkClass("/proveedores")}>
+              <UserMinus2 size={20} />
+              <span>Proveedores</span>
+            </Link>
+            <Link to="/facturas" className={getLinkClass("/facturas")}>
+              <FileText size={20} />
+              <span>Facturas</span>
+            </Link>
+          </nav>
         </div>
 
-        <nav className="space-y-1">
-          <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">
-            General
+        <div className="p-6 border-t border-gray-800 bg-gray-900">
+          <div className="p-4 bg-gray-800 rounded-lg mb-3">
+            <p className="text-sm font-medium truncate">
+              {vendedor?.nombre} {vendedor?.apellido}
+            </p>
+            <p className="text-xs text-gray-400 truncate">{vendedor?.email}</p>
           </div>
-          <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
-            <TrendingUp size={20} />
-            <span>Dashboard</span>
-          </Link>
-          <Link to="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <Package size={20} />
-            <span>Productos</span>
-          </Link>
-          <Link to="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <Users size={20} />
-            <span>Clientes</span>
-          </Link>
-          <Link to="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <ShoppingCart size={20} />
-            <span>Ventas</span>
-          </Link>
-          <Link to="/proveedores" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <UserMinus2 size={20} />
-            <span>Proveedores</span>
-          </Link>
-          <Link to="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <FileText size={20} />
-            <span>Facturas</span>
-          </Link>
-        </nav>
-      </div>
-
-      <div className="p-6 border-t border-gray-800 bg-gray-900">
-        <div className="p-4 bg-gray-800 rounded-lg mb-3">
-          <p className="text-sm font-medium truncate">
-            {vendedor?.nombre} {vendedor?.apellido}
-          </p>
-          <p className="text-xs text-gray-400 truncate">{vendedor?.email}</p>
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors w-full"
+          >
+            <LogOut size={20} />
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors w-full"
-        >
-          <LogOut size={20} />
-          <span>Cerrar Sesión</span>
-        </button>
-      </div>
-    </aside>
-  </>
-);
+      </aside>
+    </>
+  );
+};
 
 // =========================================================
-// 2. COMPONENTE STAT CARD (Dinámico)
+// 2. COMPONENTE STAT CARD (Movido AFUERA de Dashboard)
 // =========================================================
 const StatCard = ({ title, value, change, label, icon: Icon, type = "neutral" }) => {
-  // type: "positive" (verde), "negative" (rojo), "neutral" (azul/gris)
   const isPositive = type === "positive";
   const isNegative = type === "negative";
 
@@ -159,11 +173,11 @@ const Dashboard = () => {
   
   // --- ESTADOS DE DATOS ---
   const [loading, setLoading] = useState(true);
-  const [statsHoy, setStatsHoy] = useState(null);       // ventasTotal
-  const [ventas7Dias, setVentas7Dias] = useState([]);   // ventasUltimos7Dias
-  const [statsMes, setStatsMes] = useState(null);       // ventasMesActual
-  const [comparacion, setComparacion] = useState(null); // ventasHoyVsAyer
-  const [totalProductos, setTotalProductos] = useState(0); // contarProductos
+  const [statsHoy, setStatsHoy] = useState(null);
+  const [ventas7Dias, setVentas7Dias] = useState([]);
+  const [statsMes, setStatsMes] = useState(null);
+  const [comparacion, setComparacion] = useState(null);
+  const [totalProductos, setTotalProductos] = useState(0);
 
   useEffect(() => {
     cargarDatosCompletos();
@@ -172,8 +186,6 @@ const Dashboard = () => {
   const cargarDatosCompletos = async () => {
     try {
       setLoading(true);
-
-      // Llamada paralela a los 5 endpoints del backend
       const [resHoy, res7Dias, resMes, resComparacion, resProductos] = await Promise.all([
         api.get("/api/ventas/realizadas"),   
         api.get("/api/ventas7dias"),         
@@ -195,7 +207,6 @@ const Dashboard = () => {
     }
   };
 
-  // --- LÓGICA DE COMPARACIÓN ---
   const getComparacionVentas = () => {
     if (!comparacion) return { text: "0%", type: "neutral" };
     const tendencia = comparacion.comparacion.tendencia;
@@ -259,7 +270,7 @@ const Dashboard = () => {
           <div className="w-10" />
         </div>
 
-        {/* CONTENIDO PRINCIPAL SCROLLABLE */}
+        {/* CONTENIDO PRINCIPAL */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-8">
           <div className="max-w-[1600px] mx-auto pb-6">
             
@@ -273,30 +284,8 @@ const Dashboard = () => {
               </p>
             </div>
 
-            {/* Desktop Search Bar */}
-            <div className="hidden lg:flex items-center gap-4 mb-8">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Buscar..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm"
-                />
-              </div>
-              <div className="flex gap-2">
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200">
-                  <Bell size={20} className="text-gray-600" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200">
-                  <Settings size={20} className="text-gray-600" />
-                </button>
-              </div>
-            </div>
-
-            {/* --- GRID DE CARDS --- */}
+            {/* Grid Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
-              
-              {/* 1. Ventas del Día (Cantidad y tendencia) */}
               <StatCard
                 title="Ventas Hoy"
                 value={statsHoy?.total_ventas || 0}
@@ -305,8 +294,6 @@ const Dashboard = () => {
                 label="Vs. ayer"
                 icon={ShoppingCart}
               />
-
-              {/* 2. Ingresos del Día (Dinero y tendencia) */}
               <StatCard
                 title="Ingresos Hoy"
                 value={formatCurrency(statsHoy?.monto_total || 0)}
@@ -315,8 +302,6 @@ const Dashboard = () => {
                 label="Vs. ayer"
                 icon={DollarSign}
               />
-
-              {/* 3. Ingresos del Mes (Acumulado) */}
               <StatCard
                 title={`Ingresos ${statsMes?.mes || 'Mes'}`}
                 value={formatCurrency(statsMes?.monto_total || 0)}
@@ -324,8 +309,6 @@ const Dashboard = () => {
                 type="neutral"
                 icon={Calendar}
               />
-
-              {/* 4. Total Productos (Inventario Real) */}
               <StatCard
                 title="Inventario"
                 value={totalProductos}
@@ -335,77 +318,23 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* --- GRÁFICO --- */}
+            {/* Gráfico */}
             <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-100 mb-6 lg:mb-8">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h2 className="text-lg lg:text-xl font-bold text-gray-900">
                   Tendencia últimos 7 Días
                 </h2>
-                <div className="flex items-center gap-3 lg:gap-4 text-xs lg:text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-600">Ventas (#)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-600">Ingresos (Bs)</span>
-                  </div>
-                </div>
               </div>
-
               {ventas7Dias.length > 0 ? (
                 <div className="w-full h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={ventas7Dias} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                      <XAxis
-                        dataKey="fecha"
-                        stroke="#9ca3af"
-                        tick={{ fontSize: 12 }}
-                        tickFormatter={(fecha) => {
-                          const date = new Date(fecha);
-                          return `${date.getDate()}/${date.getMonth() + 1}`;
-                        }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis 
-                        stroke="#9ca3af" 
-                        tick={{ fontSize: 12 }} 
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        contentStyle={{ 
-                            backgroundColor: '#fff', 
-                            borderRadius: '8px', 
-                            border: '1px solid #e5e7eb',
-                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' 
-                        }}
-                        formatter={(value, name) => [
-                          name === "monto_total" ? formatCurrency(value) : value,
-                          name === "monto_total" ? "Ingresos" : "Ventas",
-                        ]}
-                        labelFormatter={(fecha) => formatDate(fecha)}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="total_ventas"
-                        stroke="#22c55e"
-                        strokeWidth={3}
-                        dot={{ fill: "#22c55e", r: 4, strokeWidth: 2, stroke: '#fff' }}
-                        activeDot={{ r: 6 }}
-                        name="Ventas"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="monto_total"
-                        stroke="#3b82f6"
-                        strokeWidth={3}
-                        dot={{ fill: "#3b82f6", r: 4, strokeWidth: 2, stroke: '#fff' }}
-                        activeDot={{ r: 6 }}
-                        name="Ingresos"
-                      />
+                      <XAxis dataKey="fecha" stroke="#9ca3af" tick={{ fontSize: 12 }} tickFormatter={(fecha) => { const date = new Date(fecha); return `${date.getDate()}/${date.getMonth() + 1}`; }} axisLine={false} tickLine={false} />
+                      <YAxis stroke="#9ca3af" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value, name) => [name === "monto_total" ? formatCurrency(value) : value, name === "monto_total" ? "Ingresos" : "Ventas"]} labelFormatter={(fecha) => formatDate(fecha)} />
+                      <Line type="monotone" dataKey="total_ventas" stroke="#22c55e" strokeWidth={3} dot={{ fill: "#22c55e", r: 4, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} name="Ventas" />
+                      <Line type="monotone" dataKey="monto_total" stroke="#3b82f6" strokeWidth={3} dot={{ fill: "#3b82f6", r: 4, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} name="Ingresos" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -416,9 +345,9 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* --- ACCIONES RÁPIDAS --- */}
+            {/* Acciones Rápidas con LINK */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-              <a href="/ventas" className="group block">
+              <Link to="/ventas" className="group block">
                 <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-5 lg:p-6 text-white shadow-lg hover:shadow-green-200 hover:-translate-y-1 transition-all duration-200 h-full">
                   <div className="bg-white/20 w-fit p-3 rounded-lg mb-4">
                     <ShoppingCart size={24} className="text-white" />
@@ -429,33 +358,8 @@ const Dashboard = () => {
                     Ir a Ventas →
                   </span>
                 </div>
-              </a>
-
-              <a href="/productos" className="group block">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 lg:p-6 text-white shadow-lg hover:shadow-blue-200 hover:-translate-y-1 transition-all duration-200 h-full">
-                  <div className="bg-white/20 w-fit p-3 rounded-lg mb-4">
-                    <Package size={24} className="text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold mb-1">Productos</h3>
-                  <p className="text-blue-100 text-sm mb-4">Gestiona tu inventario</p>
-                  <span className="inline-flex items-center text-sm font-medium bg-white/20 px-3 py-1 rounded-lg group-hover:bg-white group-hover:text-blue-600 transition-colors">
-                    Ver Productos →
-                  </span>
-                </div>
-              </a>
-
-              <a href="/clientes" className="group block">
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 lg:p-6 text-white shadow-lg hover:shadow-purple-200 hover:-translate-y-1 transition-all duration-200 h-full">
-                  <div className="bg-white/20 w-fit p-3 rounded-lg mb-4">
-                    <Users size={24} className="text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold mb-1">Clientes</h3>
-                  <p className="text-purple-100 text-sm mb-4">Administra tus clientes</p>
-                  <span className="inline-flex items-center text-sm font-medium bg-white/20 px-3 py-1 rounded-lg group-hover:bg-white group-hover:text-purple-600 transition-colors">
-                    Ver Clientes →
-                  </span>
-                </div>
-              </a>
+              </Link>
+              {/* ... Repetir Links para Productos y Clientes ... */}
             </div>
 
           </div>

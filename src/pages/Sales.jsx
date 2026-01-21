@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../config/api";
 import { formatCurrency } from "../utils/format";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Importante para la navegación
 import {
   ShoppingCart,
   Plus,
@@ -17,88 +17,112 @@ import {
   Trash2,
   FileDown,
   CheckCircle,
-  FileText
+  FileText,
+  UserMinus2
 } from "lucide-react";
 
-// --- 1. SIDEBAR ---
-const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
-  <>
-    {sidebarOpen && (
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-        onClick={() => setSidebarOpen(false)}
-      />
-    )}
+// =========================================================
+// 1. COMPONENTE SIDEBAR (Optimizado y Fuera del Main)
+// =========================================================
+const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => {
+  const location = useLocation(); // Para saber en qué página estamos
 
-    <aside
-      className={`
-      fixed lg:static top-0 left-0 z-50 h-full w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300
-      ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      shrink-0
-    `}
-    >
-      <div className="p-6 flex-1 overflow-y-auto">
-        <button
+  // Función para asignar clase activa (verde) o inactiva (gris)
+  const getLinkClass = (path) => {
+    const isActive = location.pathname === path;
+    return `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+      isActive 
+        ? "bg-green-600 text-white shadow-md" 
+        : "text-gray-400 hover:bg-gray-800 hover:text-white"
+    }`;
+  };
+
+  return (
+    <>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
-          className="absolute top-4 right-4 lg:hidden text-gray-400 hover:text-white"
-        >
-          <X size={24} />
-        </button>
+        />
+      )}
 
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Package size={24} />
+      <aside
+        className={`
+        fixed lg:static top-0 left-0 z-50 h-full w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        shrink-0
+      `}
+      >
+        <div className="p-6 flex-1 overflow-y-auto">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="absolute top-4 right-4 lg:hidden text-gray-400 hover:text-white"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Package size={24} />
+            </div>
+            <span className="text-xl font-bold">Librería T&M</span>
           </div>
-          <span className="text-xl font-bold">Librería T&M</span>
+
+          <nav className="space-y-1">
+            <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">
+              General
+            </div>
+            {/* Usamos LINK en lugar de <a> para evitar recargas */}
+            <Link to="/" className={getLinkClass("/")}>
+              <TrendingUp size={20} />
+              <span>Dashboard</span>
+            </Link>
+            <Link to="/productos" className={getLinkClass("/productos")}>
+              <Package size={20} />
+              <span>Productos</span>
+            </Link>
+            <Link to="/clientes" className={getLinkClass("/clientes")}>
+              <Users size={20} />
+              <span>Clientes</span>
+            </Link>
+            <Link to="/ventas" className={getLinkClass("/ventas")}>
+              <ShoppingCart size={20} />
+              <span>Ventas</span>
+            </Link>
+            <Link to="/proveedores" className={getLinkClass("/proveedores")}>
+              <UserMinus2 size={20} />
+              <span>Proveedores</span>
+            </Link>
+            <Link to="/facturas" className={getLinkClass("/facturas")}>
+              <FileText size={20} />
+              <span>Facturas</span>
+            </Link>
+          </nav>
         </div>
 
-        <nav className="space-y-1">
-          <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">
-            General
+        <div className="p-6 border-t border-gray-800 bg-gray-900">
+          <div className="p-4 bg-gray-800 rounded-lg mb-3">
+            <p className="text-sm font-medium truncate">
+              {vendedor?.nombre} {vendedor?.apellido}
+            </p>
+            <p className="text-xs text-gray-400 truncate">{vendedor?.email}</p>
           </div>
-          <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <TrendingUp size={20} />
-            <span>Dashboard</span>
-          </Link>
-          <Link to="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <Package size={20} />
-            <span>Productos</span>
-          </Link>
-          <Link to="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <Users size={20} />
-            <span>Clientes</span>
-          </Link>
-          <Link to="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
-            <ShoppingCart size={20} />
-            <span>Ventas</span>
-          </Link>
-          <Link to="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <FileText size={20} />
-            <span>Facturas</span>
-          </Link>
-        </nav>
-      </div>
-
-      <div className="p-6 border-t border-gray-800 bg-gray-900">
-        <div className="p-4 bg-gray-800 rounded-lg mb-3">
-          <p className="text-sm font-medium truncate">
-            {vendedor?.nombre} {vendedor?.apellido}
-          </p>
-          <p className="text-xs text-gray-400 truncate">{vendedor?.email}</p>
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors w-full"
+          >
+            <LogOut size={20} />
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors w-full"
-        >
-          <LogOut size={20} />
-          <span>Cerrar Sesión</span>
-        </button>
-      </div>
-    </aside>
-  </>
-);
+      </aside>
+    </>
+  );
+};
 
-// --- MODAL ÉXITO ---
+// =========================================================
+// 2. COMPONENTE MODAL ÉXITO
+// =========================================================
 const SuccessModal = ({ isOpen, onClose, facturaId }) => {
   if (!isOpen) return null;
 
@@ -143,7 +167,9 @@ const SuccessModal = ({ isOpen, onClose, facturaId }) => {
   );
 };
 
-// --- COMPONENTE PRINCIPAL ---
+// =========================================================
+// 3. COMPONENTE PRINCIPAL SALES
+// =========================================================
 const Sales = () => {
   const { vendedor, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -273,7 +299,7 @@ const Sales = () => {
     try {
       const ventaData = {
         id_cliente: parseInt(clienteSeleccionado),
-        id_vendedor: vendedor.id, // <--- AQUÍ ESTÁ LA SOLUCIÓN
+        id_vendedor: vendedor.id, // ID del vendedor corregido
         productos: carrito.map((item) => ({
           id_producto: item.id,
           cantidad: item.cantidad,
