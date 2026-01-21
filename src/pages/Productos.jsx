@@ -4,6 +4,7 @@ import api from "../config/api";
 import { formatCurrency } from "../utils/format";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { Link, useLocation } from "react-router-dom";
+import { supabase } from "../config/supabaseClient";
 import {
   Package,
   Plus,
@@ -19,15 +20,26 @@ import {
   Upload,
   Image as ImageIcon,
   FileText,
-  UserMinus2
+  UserMinus2,
 } from "lucide-react";
 
 // --- CONSTANTES ---
 const CATEGORIAS = [
-  "papeleria", "color", "marcador", "boligrafo", "lapiz",
-  "borrador-tajador", "tijeras", "plastilina", "pintura",
-  "instrumento-musical", "instrumento-laboratorio", "regalo",
-  "tela", "pegamento", "otros",
+  "papeleria",
+  "color",
+  "marcador",
+  "boligrafo",
+  "lapiz",
+  "borrador-tajador",
+  "tijeras",
+  "plastilina",
+  "pintura",
+  "instrumento-musical",
+  "instrumento-laboratorio",
+  "regalo",
+  "tela",
+  "pegamento",
+  "otros",
 ];
 
 // --- 1. SIDEBAR (Optimizado Flexbox) ---
@@ -66,27 +78,45 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
           <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">
             General
           </div>
-          <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link
+            to="/"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          >
             <TrendingUp size={20} />
             <span>Dashboard</span>
           </Link>
-          <Link to="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
+          <Link
+            to="/productos"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white"
+          >
             <Package size={20} />
             <span>Productos</span>
           </Link>
-          <Link to="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link
+            to="/clientes"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          >
             <Users size={20} />
             <span>Clientes</span>
           </Link>
-          <Link to="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link
+            to="/ventas"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          >
             <ShoppingCart size={20} />
             <span>Ventas</span>
           </Link>
-          <Link to="/proveedores" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link
+            to="/proveedores"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          >
             <UserMinus2 size={20} />
             <span>Proveedores</span>
           </Link>
-          <Link to="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link
+            to="/facturas"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          >
             <FileText size={20} />
             <span>Facturas</span>
           </Link>
@@ -202,7 +232,10 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
           <h2 className="text-xl font-bold text-gray-900">
             {product ? "Editar Producto" : "Nuevo Producto"}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X size={24} />
           </button>
         </div>
@@ -397,18 +430,39 @@ const Products = () => {
 
   useEffect(() => {
     cargarProductos();
+    const canal = supabase
+      .channel("tabla-productos-alerta") // Nombre cualquiera para el canal
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Escuchar TODO (Insert, Update, Delete)
+          schema: "public",
+          table: "Producto", // Nombre EXACTO de tu tabla en Supabase
+        },
+        (payload) => {
+          console.log("🔔 ¡Cambio detectado en BD!", payload);
+          // Si algo cambió, recargamos la lista automáticamente
+          cargarDatos();
+        },
+      )
+      .subscribe();
+
+    // 3. Limpieza: Desconectar cuando te vas de la página
+    return () => {
+      supabase.removeChannel(canal);
+    };
   }, []);
 
   const cargarProductos = async () => {
     try {
       setLoading(true);
       const { data } = await api.get("/api/product");
-      
+
       // ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE!
       // Tu backend devuelve la lista procesada en 'data.product' (singular)
       // Usamos 'data.product' si existe, si no 'data.productos' como respaldo
       const productosRecibidos = data.product || data.productos || [];
-      
+
       setProductos(productosRecibidos);
     } catch (error) {
       console.error("❌ ERROR COMPLETO:", error);
@@ -461,8 +515,8 @@ const Products = () => {
       console.error("Error al eliminar:", error);
       alert("Error al eliminar el producto");
     } finally {
-        setConfirmDelete(false);
-        setProductToDelete(null);
+      setConfirmDelete(false);
+      setProductToDelete(null);
     }
   };
 
@@ -544,7 +598,9 @@ const Products = () => {
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-gray-200 shadow-sm">
               <Package size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500 font-medium">No hay productos disponibles</p>
+              <p className="text-gray-500 font-medium">
+                No hay productos disponibles
+              </p>
             </div>
           ) : (
             // GRID RESPONSIVO AUTOMÁTICO
@@ -571,7 +627,10 @@ const Products = () => {
                   <div className="p-4 flex-1 flex flex-col">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1 min-w-0 pr-2">
-                        <h3 className="font-semibold text-gray-900 truncate" title={producto.nombre}>
+                        <h3
+                          className="font-semibold text-gray-900 truncate"
+                          title={producto.nombre}
+                        >
                           {producto.nombre}
                         </h3>
                         {producto.categoria && (
@@ -580,7 +639,7 @@ const Products = () => {
                           </span>
                         )}
                       </div>
-                      
+
                       {/* --- AQUÍ ESTÁ LA LÓGICA DE ELIMINAR --- */}
                       <div className="flex gap-1 shrink-0">
                         <button
@@ -604,8 +663,8 @@ const Products = () => {
                             <Trash2 size={16} />
                           </button>
                         ) : (
-                          <div 
-                            className="p-1.5 text-gray-300 cursor-not-allowed" 
+                          <div
+                            className="p-1.5 text-gray-300 cursor-not-allowed"
                             title="No se puede eliminar porque tiene ventas asociadas"
                           >
                             <Trash2 size={16} />
