@@ -428,31 +428,6 @@ const Products = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  useEffect(() => {
-    cargarProductos();
-    const canal = supabase
-      .channel("tabla-productos-alerta") // Nombre cualquiera para el canal
-      .on(
-        "postgres_changes",
-        {
-          event: "*", // Escuchar TODO (Insert, Update, Delete)
-          schema: "public",
-          table: "Producto", // Nombre EXACTO de tu tabla en Supabase
-        },
-        (payload) => {
-          console.log("🔔 ¡Cambio detectado en BD!", payload);
-          // Si algo cambió, recargamos la lista automáticamente
-          cargarDatos();
-        },
-      )
-      .subscribe();
-
-    // 3. Limpieza: Desconectar cuando te vas de la página
-    return () => {
-      supabase.removeChannel(canal);
-    };
-  }, []);
-
   const cargarProductos = async () => {
     try {
       setLoading(true);
@@ -470,6 +445,33 @@ const Products = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    cargarProductos();
+    const canal = supabase
+      .channel("tabla-productos-alerta") // Nombre cualquiera para el canal
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Escuchar TODO (Insert, Update, Delete)
+          schema: "public",
+          table: "producto", // Nombre EXACTO de tu tabla en Supabase
+        },
+        (payload) => {
+          console.log("🔔 ¡Cambio detectado en BD!", payload);
+          // Si algo cambió, recargamos la lista automáticamente
+          cargarProductos();
+        },
+      )
+      .subscribe();
+
+    // 3. Limpieza: Desconectar cuando te vas de la página
+    return () => {
+      supabase.removeChannel(canal);
+    };
+  }, []);
+
+  
 
   const handleSave = async (formData, isUpdate) => {
     try {
