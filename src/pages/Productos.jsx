@@ -428,24 +428,6 @@ const Products = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  const cargarProductos = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get("/api/product");
-
-      // ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE!
-      // Tu backend devuelve la lista procesada en 'data.product' (singular)
-      // Usamos 'data.product' si existe, si no 'data.productos' como respaldo
-      const productosRecibidos = data.product || data.productos || [];
-
-      setProductos(productosRecibidos);
-    } catch (error) {
-      console.error("❌ ERROR COMPLETO:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     cargarProductos();
     const canal = supabase
@@ -471,6 +453,23 @@ const Products = () => {
     };
   }, []);
 
+  const cargarProductos = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get("/api/product");
+
+      // ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE!
+      // Tu backend devuelve la lista procesada en 'data.product' (singular)
+      // Usamos 'data.product' si existe, si no 'data.productos' como respaldo
+      const productosRecibidos = data.product || data.productos || [];
+
+      setProductos(productosRecibidos);
+    } catch (error) {
+      console.error("❌ ERROR COMPLETO:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async (formData, isUpdate) => {
     try {
