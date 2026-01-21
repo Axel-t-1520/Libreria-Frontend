@@ -112,7 +112,11 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
 
   useEffect(() => {
     if (customer) {
-      setFormData(customer);
+      setFormData({
+        ...customer,
+        ci: customer.ci || "", 
+        telefono: customer.telefono || ""
+      });
     } else {
       setFormData({
         nombre: "",
@@ -127,7 +131,12 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await onSave(formData);
+      const datosParaEnviar = {
+        ...formData,
+        ci: formData.ci.toString().trim() === "" ? null : formData.ci,
+        telefono: formData.telefono.toString().trim() === "" ? null : formData.telefono
+      };
+      await onSave(datosParaEnviar);
     } finally {
       setLoading(false);
     }
@@ -180,7 +189,6 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
               value={formData.ci}
               onChange={(e) => setFormData({ ...formData, ci: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
             />
           </div>
 

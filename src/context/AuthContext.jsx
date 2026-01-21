@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
-        recuperarPassword, // Exportamos la nueva función
+        recuperarPassword,
         isAuthenticated: !!vendedor,
       }}
     >
