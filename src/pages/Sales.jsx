@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../config/api";
-import { formatCurrency, formatDateTime } from "../utils/format";
+import { formatCurrency } from "../utils/format";
+import { Link, useLocation } from "react-router-dom";
 import {
   ShoppingCart,
   Plus,
@@ -19,7 +20,7 @@ import {
   FileText
 } from "lucide-react";
 
-// --- 1. SIDEBAR OPTIMIZADO (Flexbox) ---
+// --- 1. SIDEBAR ---
 const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
   <>
     {sidebarOpen && (
@@ -55,26 +56,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
           <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">
             General
           </div>
-          <a href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <TrendingUp size={20} />
             <span>Dashboard</span>
-          </a>
-          <a href="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          </Link>
+          <Link href="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <Package size={20} />
             <span>Productos</span>
-          </a>
-          <a href="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          </Link>
+          <Link href="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <Users size={20} />
             <span>Clientes</span>
-          </a>
-          <a href="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
+          </Link>
+          <Link href="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
             <ShoppingCart size={20} />
             <span>Ventas</span>
-          </a>
-          <a href="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          </Link>
+          <Link href="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <FileText size={20} />
             <span>Facturas</span>
-          </a>
+          </Link>
         </nav>
       </div>
 
@@ -97,6 +98,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
   </>
 );
 
+// --- MODAL ÉXITO ---
 const SuccessModal = ({ isOpen, onClose, facturaId }) => {
   if (!isOpen) return null;
 
@@ -141,6 +143,7 @@ const SuccessModal = ({ isOpen, onClose, facturaId }) => {
   );
 };
 
+// --- COMPONENTE PRINCIPAL ---
 const Sales = () => {
   const { vendedor, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -249,6 +252,12 @@ const Sales = () => {
   };
 
   const realizarVenta = async () => {
+    // 1. VALIDACIÓN DE SEGURIDAD PARA EL VENDEDOR
+    if (!vendedor?.id) {
+        alert("Error: No se ha identificado al vendedor. Por favor recarga la página.");
+        return;
+    }
+
     if (!clienteSeleccionado) {
       alert("Selecciona un cliente");
       return;
@@ -264,7 +273,7 @@ const Sales = () => {
     try {
       const ventaData = {
         id_cliente: parseInt(clienteSeleccionado),
-        id_vendedor: vendedor.id,
+        id_vendedor: vendedor.id, // <--- AQUÍ ESTÁ LA SOLUCIÓN
         productos: carrito.map((item) => ({
           id_producto: item.id,
           cantidad: item.cantidad,
@@ -295,7 +304,6 @@ const Sales = () => {
   }
 
   return (
-    // --- 2. CONTENEDOR PRINCIPAL FLEX (Full Height) ---
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar
         sidebarOpen={sidebarOpen}
@@ -304,10 +312,8 @@ const Sales = () => {
         logout={logout}
       />
 
-      {/* --- 3. ÁREA DE CONTENIDO (Flex Grow + Scroll Interno) --- */}
       <div className="flex-1 flex flex-col h-full w-full relative">
-        
-        {/* Mobile Header (Sticky en móvil) */}
+        {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -324,7 +330,6 @@ const Sales = () => {
           <div className="w-10" />
         </div>
 
-        {/* Scrollable Main Content */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-6 xl:p-8">
           <div className="max-w-[1600px] mx-auto">
             <div className="mb-6">
@@ -336,14 +341,13 @@ const Sales = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
               
-              {/* --- COLUMNA 1: Productos (Ocupa 2/3 en desktop) --- */}
+              {/* --- COLUMNA 1: Productos --- */}
               <div className="lg:col-span-2 space-y-4">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                   <h2 className="text-lg font-bold text-gray-900 mb-4">
                     Productos Disponibles
                   </h2>
 
-                  {/* Búsqueda */}
                   <div className="relative mb-4">
                     <Search
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -358,7 +362,6 @@ const Sales = () => {
                     />
                   </div>
 
-                  {/* Lista de productos con scroll limitado solo a esta lista si es muy larga */}
                   <div className="space-y-2 max-h-[60vh] lg:max-h-[600px] overflow-y-auto pr-1 custom-scrollbar">
                     {productosFiltrados.length === 0 ? (
                       <div className="text-center py-12">
@@ -420,10 +423,9 @@ const Sales = () => {
                 </div>
               </div>
 
-              {/* --- COLUMNA 2: Carrito (Ocupa 1/3 en desktop) --- */}
+              {/* --- COLUMNA 2: Carrito --- */}
               <div className="space-y-6 lg:sticky lg:top-0">
                 
-                {/* Selector de Cliente */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                   <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                     <Users size={16} />
@@ -443,7 +445,6 @@ const Sales = () => {
                   </select>
                 </div>
 
-                {/* Resumen del Carrito */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -526,7 +527,6 @@ const Sales = () => {
                     </div>
                   )}
 
-                  {/* Footer del Carrito (Siempre visible si hay items) */}
                   {carrito.length > 0 && (
                     <div className="mt-auto pt-4 border-t border-gray-100 bg-white">
                       <div className="flex justify-between items-end mb-4">

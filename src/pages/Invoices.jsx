@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../config/api';
 import { formatDateTime } from '../utils/format';
+import { Link, useLocation } from "react-router-dom";
 import { 
   FileText, 
   Search, 
@@ -16,7 +17,8 @@ import {
   Calendar,
   User,
   UserMinus2,
-  ChevronRight
+  ChevronRight,
+  Link
 } from 'lucide-react';
 
 // --- SIDEBAR (Se mantiene igual) ---
@@ -51,30 +53,30 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
 
         <nav className="space-y-1">
           <div className="text-xs text-gray-500 uppercase mb-3 font-semibold">General</div>
-          <a href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <TrendingUp size={20} />
             <span>Dashboard</span>
-          </a>
-          <a href="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          </Link>
+          <Link href="/productos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <Package size={20} />
             <span>Productos</span>
-          </a>
-          <a href="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          </Link>
+          <Link href="/clientes" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <Users size={20} />
             <span>Clientes</span>
-          </a>
-          <a href="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          </Link>
+          <Link href="/ventas" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <ShoppingCart size={20} />
             <span>Nueva Venta</span>
-          </a>
-          <a href="/proveedores" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          </Link>
+          <Link href="/proveedores" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             <UserMinus2 size={20} />
             <span>Proveedores</span>
-          </a>
-          <a href="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
+          </Link>
+          <Link href="/facturas" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-600 text-white">
             <FileText size={20} />
             <span>Facturas</span>
-          </a>
+          </Link>
         </nav>
       </div>
 
