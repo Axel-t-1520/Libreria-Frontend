@@ -97,10 +97,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => {
               <ShoppingCart size={20} />
               <span>Ventas</span>
             </Link>
-            <Link to="/proveedores" className={getLinkClass("/proveedores")}>
-              <UserMinus2 size={20} />
-              <span>Proveedores</span>
-            </Link>
             <Link to="/facturas" className={getLinkClass("/facturas")}>
               <FileText size={20} />
               <span>Facturas</span>
