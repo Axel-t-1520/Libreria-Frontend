@@ -18,8 +18,7 @@ import {
   Phone,
   CreditCard,
   FileText,
-  Calendar,
-  Link
+  Calendar
 } from "lucide-react";
 import { formatDate, formatDateTime } from "../utils/format";
 

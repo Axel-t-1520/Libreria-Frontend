@@ -18,7 +18,6 @@ import {
   User,
   UserMinus2,
   ChevronRight,
-  Link
 } from 'lucide-react';
 
 // --- SIDEBAR (Se mantiene igual) ---
