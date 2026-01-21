@@ -168,7 +168,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
 
       formDataToSend.append(
         "precio_unitario",
-        Math.round(parseFloat(formData.precio_unitario) * 100) || 0,
+        Math.round(parseFloat(formData.precio_unitario)) || 0,
       );
       formDataToSend.append(
         "stock",
@@ -176,7 +176,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
       );
       formDataToSend.append(
         "precio_venta",
-        Math.round(parseFloat(formData.precio_venta) * 100) || 0,
+        Math.round(parseFloat(formData.precio_venta)) || 0,
       );
 
       if (formData.categoria)
