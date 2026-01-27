@@ -419,63 +419,52 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  // --- FUNCIÓN DE CARGA CORREGIDA ---
-  const cargarProductos = async () => {
-    // 🛡️ Verificar token antes de disparar el fetch
-    const token = localStorage.getItem('token'); 
-    if (!token || token === 'undefined') return;
+  useEffect(() => {
+    cargarProductos();
+    const canal = supabase
+      .channel("tabla-productos-alerta") // Nombre cualquiera para el canal
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Escuchar TODO (Insert, Update, Delete)
+          schema: "public",
+          table: "Producto", // Nombre EXACTO de tu tabla en Supabase
+        },
+        (payload) => {
+          console.log("🔔 ¡Cambio detectado en BD!", payload);
+          // Si algo cambió, recargamos la lista automáticamente
+          cargarProductos();
+        },
+      )
+      .subscribe();
 
+    // 3. Limpieza: Desconectar cuando te vas de la página
+    return () => {
+      supabase.removeChannel(canal);
+    };
+  }, []);
+
+  const cargarProductos = async () => {
     try {
       setLoading(true);
       const { data } = await api.get("/api/product");
+
+      // ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE!
+      // Tu backend devuelve la lista procesada en 'data.product' (singular)
+      // Usamos 'data.product' si existe, si no 'data.productos' como respaldo
       const productosRecibidos = data.product || data.productos || [];
+
       setProductos(productosRecibidos);
     } catch (error) {
-      console.error("❌ Error al cargar productos:", error);
+      console.error("❌ ERROR COMPLETO:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    // Solo disparamos la carga si el vendedor ya existe en el contexto
-    if (vendedor) {
-      cargarProductos();
-    }
-
-    const canal = supabase
-      .channel("tabla-productos-alerta")
-      .on("postgres_changes", { event: "*", schema: "public", table: "Producto" }, 
-      () => {
-        cargarProductos();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(canal);
-    };
-  }, [vendedor]); // <-- Escuchamos cuando el vendedor cambia (se loguea)
-
-  // const cargarProductos = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const { data } = await api.get("/api/product");
-
-  //     // ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE!
-  //     // Tu backend devuelve la lista procesada en 'data.product' (singular)
-  //     // Usamos 'data.product' si existe, si no 'data.productos' como respaldo
-  //     const productosRecibidos = data.product || data.productos || [];
-
-  //     setProductos(productosRecibidos);
-  //   } catch (error) {
-  //     console.error("❌ ERROR COMPLETO:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handleSave = async (formData, isUpdate) => {
     try {
