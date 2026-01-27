@@ -39,6 +39,8 @@ const CATEGORIAS = [
   "regalo",
   "tela",
   "pegamento",
+  "libro",
+  "estuche-geometrico",
   "otros",
 ];
 
