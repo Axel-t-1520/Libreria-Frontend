@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../config/api";
 import ConfirmDialog from "../components/ConfirmDialog";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Users,
   Plus,
@@ -20,9 +20,9 @@ import {
   FileText,
   Calendar
 } from "lucide-react";
-import { formatDateTime } from "../utils/format";
+import { formatDate, formatDateTime } from "../utils/format";
 
-// --- 1. SIDEBAR ---
+// --- 1. SIDEBAR OPTIMIZADO (Flexbox) ---
 const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
   <>
     {sidebarOpen && (
@@ -100,39 +100,32 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, vendedor, logout }) => (
   </>
 );
 
-// --- 2. MODAL CLIENTE (CORREGIDO LIMPIEZA) ---
 const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
     ci: "",
     telefono: "",
-    fecha_registro: ""
+    fecha_registro:""
   });
   const [loading, setLoading] = useState(false);
 
-  // CORRECCIÓN 2: Agregamos [isOpen] a las dependencias.
-  // Esto fuerza a que el efecto se ejecute cada vez que se abre el modal,
-  // limpiando los campos si 'customer' es null.
   useEffect(() => {
-    if (isOpen) {
-      if (customer) {
-        setFormData({
-          ...customer,
-          ci: customer.ci || "",
-          telefono: customer.telefono || ""
-        });
-      } else {
-        // Si no hay cliente (es nuevo), limpiamos todo explícitamente
-        setFormData({
-          nombre: "",
-          apellido: "",
-          ci: "",
-          telefono: "",
-        });
-      }
+    if (customer) {
+      setFormData({
+        ...customer,
+        ci: customer.ci || "", 
+        telefono: customer.telefono || ""
+      });
+    } else {
+      setFormData({
+        nombre: "",
+        apellido: "",
+        ci: "",
+        telefono: "",
+      });
     }
-  }, [customer, isOpen]); // <--- 'isOpen' es la clave aquí
+  }, [customer]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -190,13 +183,12 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">CI</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">CI *</label>
             <input
               type="text"
               value={formData.ci}
               onChange={(e) => setFormData({ ...formData, ci: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Opcional"
             />
           </div>
 
@@ -207,7 +199,7 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
               value={formData.telefono}
               onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Opcional"
+              placeholder="70123456"
             />
           </div>
 
@@ -234,7 +226,6 @@ const CustomerModal = ({ isOpen, onClose, customer, onSave }) => {
   );
 };
 
-// --- 3. COMPONENTE PRINCIPAL (CORREGIDO MAYÚSCULAS) ---
 const Customers = () => {
   const { vendedor, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -304,6 +295,7 @@ const Customers = () => {
   );
 
   return (
+    // --- 2. CONTENEDOR PRINCIPAL FLEX (Full Height) ---
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar
         sidebarOpen={sidebarOpen}
@@ -312,7 +304,9 @@ const Customers = () => {
         logout={logout}
       />
 
+      {/* --- 3. ÁREA DE CONTENIDO (Flex Grow + Scroll Interno) --- */}
       <div className="flex-1 flex flex-col h-full w-full relative">
+        
         {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shrink-0 z-10">
           <button
@@ -327,7 +321,7 @@ const Customers = () => {
           <div className="w-10" />
         </div>
 
-        {/* Main Content */}
+        {/* Scrollable Main Content */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-8">
           <div className="max-w-[1600px] mx-auto">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
@@ -414,12 +408,11 @@ const Customers = () => {
                           >
                             <td className="px-6 py-4">
                               <div className="flex items-center">
-                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 text-green-700 font-bold text-sm uppercase">
+                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 text-green-700 font-bold text-sm">
                                     {cliente.nombre?.[0]}{cliente.apellido?.[0]}
                                 </div>
                                 <div className="ml-4">
-                                  {/* CORRECCIÓN 1: Agregada clase 'capitalize' para mayúsculas visuales */}
-                                  <div className="text-sm font-semibold text-gray-900 capitalize">
+                                  <div className="text-sm font-semibold text-gray-900">
                                     {cliente.nombre} {cliente.apellido}
                                   </div>
                                   <div className="text-xs text-gray-500">
@@ -429,16 +422,12 @@ const Customers = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              {cliente.ci ? (
-                                <div className="flex items-center gap-2 text-gray-700">
-                                  <CreditCard size={14} className="text-gray-400" />
-                                  <span className="text-sm">
-                                    {cliente.ci}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-sm text-gray-400 italic">No registrado</span>
-                              )}
+                              <div className="flex items-center gap-2 bg-gray-50 w-fit px-2 py-1 rounded text-gray-700">
+                                <CreditCard size={14} className="text-gray-400" />
+                                <span className="text-sm font-medium">
+                                  {cliente.ci}
+                                </span>
+                              </div>
                             </td>
                             <td className="px-6 py-4">
                               {cliente.telefono ? (
@@ -472,7 +461,13 @@ const Customers = () => {
                                 >
                                   <Edit size={18} />
                                 </button>
-                                {/* Botón eliminar condicional (que ya tenías, mantuve la lógica visual simple) */}
+                                <button
+                                  onClick={() => handleDeleteClick(cliente)}
+                                  className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-lg transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
                               </div>
                             </td>
                           </tr>
