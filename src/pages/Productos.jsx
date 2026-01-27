@@ -39,6 +39,7 @@ const CATEGORIAS = [
   "regalo",
   "tela",
   "pegamento",
+  "venesta",
   "libro",
   "estuche-geometrico",
   "otros",
